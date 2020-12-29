@@ -10,6 +10,14 @@ Documentation is at [https://developer.atlassian.com/bitbucket/api/2/reference/]
 
 If you're looking for Bitbucket Server API, try [this repository](https://github.com/lvermeulen/Bitbucket.Net).
 
+## Nuget instructions
+This package is managed with Nuget, in order to update it, follow the next steps.
+
+```
+dotnet pack --configuration Release
+dotnet nuget push src/Bitbucket.Cloud.Net/bin/Release/Apiiro.BitbucketCloud.1.0.0.nupkg --source "github" --skip-duplicate --no-symbols true
+```
+
 ## Features
 * [X] Authentication
     * [X] OAuth2
