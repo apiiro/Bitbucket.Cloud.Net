@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
+using Flurl.Http;
 
 namespace Bitbucket.Cloud.Net.Common.MultiPart
 {
@@ -13,7 +14,7 @@ namespace Bitbucket.Cloud.Net.Common.MultiPart
 			Encoding.RegisterProvider(MultipartEncodingProvider.Instance);
 		}
 
-		public static async Task<IEnumerable<MultipartContentSection>> ReceiveMultipartAsync(this Task<HttpResponseMessage> response)
+		public static async Task<IEnumerable<MultipartContentSection>> ReceiveMultipartAsync(this Task<IFlurlResponse> response)
 		{
 			using var resp = await response.ConfigureAwait(false);
 			if (resp == null)
@@ -21,7 +22,7 @@ namespace Bitbucket.Cloud.Net.Common.MultiPart
 				return null;
 			}
 
-			string contentString = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+			string contentString = await resp.GetStringAsync().ConfigureAwait(false);
 			return contentString.ReadMultipartContent();
 		}
 
