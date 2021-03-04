@@ -45,7 +45,7 @@ namespace Bitbucket.Cloud.Net
 				.PostAsync(new StringContent(""))
 				.ConfigureAwait(false);
 
-			return response.Headers.TryGetValues("Location", out var values) ? values.FirstOrDefault() : null;
+			return response.Headers.FirstOrDefault("Location");
 		}
 
 		public async Task<string> GetRepositoryIssuesExportAsync(string workspaceId, string repositorySlug, string fileName, string localFolderPath)
