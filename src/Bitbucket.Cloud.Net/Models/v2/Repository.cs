@@ -41,5 +41,7 @@ namespace Bitbucket.Cloud.Net.Models.v2
 
         public string Description { get; set; }
         public string Key { get; set; }
+        
+        public Project Project { get; set; }
     }
 }
