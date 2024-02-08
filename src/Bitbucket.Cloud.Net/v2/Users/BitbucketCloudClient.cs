@@ -10,6 +10,9 @@ namespace Bitbucket.Cloud.Net
 	public partial class BitbucketCloudClient
 	{
 		private IFlurlRequest GetUsersUrl() => GetBaseUrl("2.0/users");
+		
+		private IFlurlRequest GetWorkspacesUrl(string workspaceName) => GetBaseUrl("2.0/workspaces").AppendPathSegment(workspaceName);
+
 
 		public async Task<User> GetUserByNameAsync(string userName)
 		{
@@ -199,6 +202,25 @@ namespace Bitbucket.Cloud.Net
 						.AppendPathSegment($"/{userName}/ssh-keys")
 						.SetQueryParams(qpv)
 						.GetJsonAsync<PagedResults<SshKey>>()
+						.ConfigureAwait(false))
+				.ConfigureAwait(false);
+		}
+		
+		public async Task<IEnumerable<RepositoryUserPermission>> GetUserRepositoryPermissionsAsync(string workspaceName, string repositorySlug, int? maxPages = null, string q = null, string sort = null)
+		{
+			var queryParamValues = new Dictionary<string, object>
+			{
+				[nameof(q)] = q,
+				[nameof(sort)] = sort
+			};
+
+			return await GetPagedResultsAsync(maxPages, queryParamValues, async qpv =>
+					await GetWorkspacesUrl(workspaceName)
+						.AppendPathSegment("/permissions")
+						.AppendPathSegment("/repositories")
+						.AppendPathSegment(repositorySlug)
+						.SetQueryParams(qpv)
+						.GetJsonAsync<PagedResults<RepositoryUserPermission>>()
 						.ConfigureAwait(false))
 				.ConfigureAwait(false);
 		}
