@@ -24,27 +24,27 @@ namespace Bitbucket.Cloud.Net
 		private readonly AuthenticationMethod _auth;
 		private readonly FlurlClient _flurlClient;
 
-		private BitbucketCloudClient(string url)
+		private BitbucketCloudClient(string url, HttpClient httpClient = null)
 		{
 			_url = url;
-			_flurlClient = new FlurlClient();
+			_flurlClient = httpClient != null ? new FlurlClient(httpClient) : new FlurlClient();
 			_flurlClient.WithSettings(s => s.JsonSerializer = new NewtonsoftJsonSerializer(s_jsonSettings));
 		}
 
-		public BitbucketCloudClient(string url, OAuthAuthentication oauth)
-			: this(url)
+		public BitbucketCloudClient(string url, OAuthAuthentication oauth, HttpClient httpClient = null)
+			: this(url, httpClient)
 		{
 			_auth = oauth;
 		}
 
-		public BitbucketCloudClient(string url, AppPasswordAuthentication appPassword)
-			: this(url)
+		public BitbucketCloudClient(string url, AppPasswordAuthentication appPassword, HttpClient httpClient = null)
+			: this(url, httpClient)
 		{
 			_auth = appPassword;
 		}
 
-		public BitbucketCloudClient(string url, BasicAuthentication basic)
-			: this(url)
+		public BitbucketCloudClient(string url, BasicAuthentication basic, HttpClient httpClient = null)
+			: this(url, httpClient)
 		{
 			_auth = basic;
 		}
