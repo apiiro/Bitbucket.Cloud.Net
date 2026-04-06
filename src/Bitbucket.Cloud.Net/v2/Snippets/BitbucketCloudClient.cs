@@ -82,7 +82,7 @@ namespace Bitbucket.Cloud.Net
 			string acceptString = SnippetsContentTypesConverter.ConvertToString(accept);
 			var request = GetSnippetsUrl(workspaceId)
 				.AppendPathSegment(snippetId)
-				.AllowHttpStatus(HttpStatusCode.NotAcceptable)
+				.AllowHttpStatus((int)HttpStatusCode.NotAcceptable)
 				.WithHeader("Accept", acceptString);
 
 			return accept switch
