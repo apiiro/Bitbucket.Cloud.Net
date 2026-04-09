@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using Bitbucket.Cloud.Net.Common.Models;
 using Bitbucket.Cloud.Net.Models.v2;
 using Flurl.Http;
-using Flurl.Http.Content;
 
 // ReSharper disable once CheckNamespace
 namespace Bitbucket.Cloud.Net
@@ -105,14 +104,14 @@ namespace Bitbucket.Cloud.Net
 
 		public async Task<Issue> CreateRepositoryIssueAttachmentAsync(string workspaceId, string repositorySlug, string issueId, IssueAttachment issueAttachment)
 		{
-			var capturedContent = new CapturedMultipartContent();
-			foreach (var propertyInfo in issueAttachment.GetType().GetProperties())
-			{
-				capturedContent.Add(propertyInfo.Name, new StringContent(propertyInfo.GetValue(issueAttachment).ToString()));
-			}
-
 			var response = await GetIssuesUrl(workspaceId, repositorySlug, issueId)
-				.PostMultipartAsync(content => content.AddStringParts(capturedContent))
+				.PostMultipartAsync(content =>
+				{
+					foreach (var propertyInfo in issueAttachment.GetType().GetProperties())
+					{
+						content.AddString(propertyInfo.Name, propertyInfo.GetValue(issueAttachment).ToString());
+					}
+				})
 				.ConfigureAwait(false);
 
 			return await HandleResponseAsync<Issue>(response).ConfigureAwait(false);

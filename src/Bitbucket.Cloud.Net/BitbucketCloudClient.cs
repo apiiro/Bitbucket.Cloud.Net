@@ -7,7 +7,7 @@ using Bitbucket.Cloud.Net.Common.Authentication;
 using Bitbucket.Cloud.Net.Common.Models;
 using Flurl;
 using Flurl.Http;
-using Flurl.Http.Configuration;
+using Flurl.Http.Newtonsoft;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -15,37 +15,42 @@ namespace Bitbucket.Cloud.Net
 {
 	public partial class BitbucketCloudClient
 	{
-		private static readonly ISerializer s_serializer = new NewtonsoftJsonSerializer(new JsonSerializerSettings { ContractResolver = new CamelCasePropertyNamesContractResolver() });
+		private static readonly JsonSerializerSettings s_jsonSettings = new JsonSerializerSettings
+		{
+			ContractResolver = new CamelCasePropertyNamesContractResolver()
+		};
 
 		private readonly Url _url;
 		private readonly AuthenticationMethod _auth;
+		private readonly FlurlClient _flurlClient;
 
-		private BitbucketCloudClient(string url)
+		private BitbucketCloudClient(string url, HttpClient httpClient = null)
 		{
 			_url = url;
+			_flurlClient = httpClient != null ? new FlurlClient(httpClient) : new FlurlClient();
+			_flurlClient.WithSettings(s => s.JsonSerializer = new NewtonsoftJsonSerializer(s_jsonSettings));
 		}
 
-		public BitbucketCloudClient(string url, OAuthAuthentication oauth)
-			: this(url)
+		public BitbucketCloudClient(string url, OAuthAuthentication oauth, HttpClient httpClient = null)
+			: this(url, httpClient)
 		{
 			_auth = oauth;
 		}
 
-		public BitbucketCloudClient(string url, AppPasswordAuthentication appPassword)
-			: this(url)
+		public BitbucketCloudClient(string url, AppPasswordAuthentication appPassword, HttpClient httpClient = null)
+			: this(url, httpClient)
 		{
 			_auth = appPassword;
 		}
 
-		public BitbucketCloudClient(string url, BasicAuthentication basic)
-			: this(url)
+		public BitbucketCloudClient(string url, BasicAuthentication basic, HttpClient httpClient = null)
+			: this(url, httpClient)
 		{
 			_auth = basic;
 		}
 
-		public IFlurlRequest GetBaseUrl(string path) => new Url(_url)
-			.AppendPathSegment(path)
-			.ConfigureRequest(settings => settings.JsonSerializer = s_serializer)
+		public IFlurlRequest GetBaseUrl(string path) => _flurlClient
+			.Request(new Url(_url).AppendPathSegment(path))
 			.WithAuthentication(_auth);
 
 		private async Task<TResult> ReadResponseContentAsync<TResult>(IFlurlResponse responseMessage, Func<string, TResult> contentHandler = null)
